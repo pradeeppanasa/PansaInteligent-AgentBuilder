@@ -15,6 +15,7 @@ class Settings(BaseSettings):
 
     DYNAMODB_TABLE_AGENTS: str = "panasa-agents"
     DYNAMODB_TABLE_TEMPLATES: str = "panasa-templates"
+    DYNAMODB_TABLE_PROMPTS: str = "panasa-prompts"
     DYNAMODB_TABLE_SESSIONS: str = "panasa-sessions"
     DYNAMODB_TABLE_AUDIT: str = "panasa-audit"
 

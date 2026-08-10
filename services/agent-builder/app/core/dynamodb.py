@@ -41,6 +41,10 @@ def get_templates_table():
     return get_dynamodb_resource().Table(settings.DYNAMODB_TABLE_TEMPLATES)
 
 
+def get_prompts_table():
+    return get_dynamodb_resource().Table(settings.DYNAMODB_TABLE_PROMPTS)
+
+
 def _create_table_if_not_exists(*, table_name: str, hash_key: str, range_key: str) -> None:
     """Idempotently create a table for local/dev use.
 
@@ -74,4 +78,12 @@ def ensure_agents_table() -> None:
 def ensure_templates_table() -> None:
     _create_table_if_not_exists(
         table_name=settings.DYNAMODB_TABLE_TEMPLATES, hash_key="category", range_key="template_id"
+    )
+
+
+def ensure_prompts_table() -> None:
+    # Sort key value is "{prompt_id}#{version:06d}" so Query + begins_with(prompt_id#)
+    # returns all versions of one prompt, in ascending version order.
+    _create_table_if_not_exists(
+        table_name=settings.DYNAMODB_TABLE_PROMPTS, hash_key="tenant_id", range_key="sort_key"
     )
