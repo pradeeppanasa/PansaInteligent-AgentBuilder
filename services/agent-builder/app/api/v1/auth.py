@@ -19,6 +19,7 @@ def _issue_tokens(user: User) -> TokenResponse:
     access_token, _ = create_token(
         user_id=user.id,
         role=user.role,
+        tenant_id=user.tenant_id,
         token_type="access",
         secret=settings.JWT_SECRET,
         algorithm=settings.JWT_ALGORITHM,
@@ -27,6 +28,7 @@ def _issue_tokens(user: User) -> TokenResponse:
     refresh_token, _ = create_token(
         user_id=user.id,
         role=user.role,
+        tenant_id=user.tenant_id,
         token_type="refresh",
         secret=settings.JWT_SECRET,
         algorithm=settings.JWT_ALGORITHM,
@@ -81,16 +83,13 @@ async def me(user: User = Depends(get_current_active_user)) -> User:
     return user
 
 
-@router.post(
-    "/register",
-    response_model=UserRead,
-    status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(require_role(Role.ADMIN))],
-)
+@router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 async def register(
     user_create: UserCreate,
+    admin: User = Depends(require_role(Role.ADMIN)),
     user_manager: UserManager = Depends(get_user_manager),
 ) -> User:
+    user_create.tenant_id = admin.tenant_id  # server-authoritative, ignores any client value
     try:
         return await user_manager.create(user_create)
     except UserAlreadyExists as exc:

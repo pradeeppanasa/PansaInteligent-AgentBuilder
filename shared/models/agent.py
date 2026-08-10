@@ -5,6 +5,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class ModelConfig(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
     provider: Literal["bedrock", "azure_openai", "self_hosted"] = "bedrock"
     model_id: str
     temperature: float = 0.7

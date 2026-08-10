@@ -38,6 +38,9 @@ async def get_current_active_user(
     if not user.is_active:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Inactive user")
 
+    if payload.get("tenant_id") != user.tenant_id:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token tenant mismatch")
+
     return user
 
 

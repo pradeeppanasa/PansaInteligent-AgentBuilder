@@ -30,6 +30,7 @@ async def seed_bootstrap_admin() -> None:
                     email=settings.BOOTSTRAP_ADMIN_EMAIL,
                     password=settings.BOOTSTRAP_ADMIN_PASSWORD,
                     role=Role.ADMIN,
+                    tenant_id=settings.BOOTSTRAP_ADMIN_TENANT_ID,
                 )
             )
             logger.info("bootstrap_admin_created", email=settings.BOOTSTRAP_ADMIN_EMAIL)

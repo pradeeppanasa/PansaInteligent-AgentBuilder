@@ -27,6 +27,7 @@ class Settings(BaseSettings):
 
     BOOTSTRAP_ADMIN_EMAIL: str | None = None
     BOOTSTRAP_ADMIN_PASSWORD: str | None = None
+    BOOTSTRAP_ADMIN_TENANT_ID: str = "default"
 
     CORS_ORIGINS: str = "http://localhost:5173"
 

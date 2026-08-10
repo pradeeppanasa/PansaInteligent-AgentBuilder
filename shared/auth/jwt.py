@@ -15,6 +15,7 @@ def create_token(
     *,
     user_id: UUID,
     role: str,
+    tenant_id: str,
     token_type: TokenType,
     secret: str,
     algorithm: str,
@@ -25,6 +26,7 @@ def create_token(
     payload: dict[str, Any] = {
         "sub": str(user_id),
         "role": role,
+        "tenant_id": tenant_id,
         "type": token_type,
         "iat": now,
         "exp": expires_at,

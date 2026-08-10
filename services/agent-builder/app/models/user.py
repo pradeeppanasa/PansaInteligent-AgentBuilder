@@ -10,3 +10,4 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
     __tablename__ = "users"
 
     role: Mapped[str] = mapped_column(String(20), nullable=False, default=Role.ANALYST)
+    tenant_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)

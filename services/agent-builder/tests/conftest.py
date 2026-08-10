@@ -1,13 +1,16 @@
 from collections.abc import AsyncGenerator
 
+import app.core.dynamodb as dynamodb_module
 import pytest
 from app.core.database import Base, get_async_session
+from app.core.dynamodb import ensure_agents_table
 from app.core.users import UserManager
 from app.main import app
 from app.models.user import User
 from app.schemas.user import UserCreate
 from fastapi_users.db import SQLAlchemyUserDatabase
 from httpx import ASGITransport, AsyncClient
+from moto import mock_aws
 from shared.auth.roles import Role
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
@@ -43,10 +46,26 @@ async def client(session_factory) -> AsyncGenerator[AsyncClient]:
 
 @pytest.fixture
 def make_user(session_factory):
-    async def _make_user(email: str, password: str, role: Role = Role.ANALYST) -> User:
+    async def _make_user(
+        email: str, password: str, role: Role = Role.ANALYST, tenant_id: str = "tenant-a"
+    ) -> User:
         async with session_factory() as session:
             user_db = SQLAlchemyUserDatabase(session, User)
             user_manager = UserManager(user_db)
-            return await user_manager.create(UserCreate(email=email, password=password, role=role))
+            return await user_manager.create(
+                UserCreate(email=email, password=password, role=role, tenant_id=tenant_id)
+            )
 
     return _make_user
+
+
+@pytest.fixture
+def dynamodb_table(monkeypatch):
+    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "testing")
+    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "testing")
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
+    with mock_aws():
+        dynamodb_module._resource = None
+        ensure_agents_table()
+        yield
+        dynamodb_module._resource = None

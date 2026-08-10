@@ -7,10 +7,12 @@ from shared.auth.roles import Role
 
 class UserRead(schemas.BaseUser[uuid.UUID]):
     role: Role
+    tenant_id: str
 
 
 class UserCreate(schemas.BaseUserCreate):
     role: Role = Role.ANALYST
+    tenant_id: str = ""  # ignored on input; server always sets this from the requesting admin
 
 
 class LoginRequest(BaseModel):
