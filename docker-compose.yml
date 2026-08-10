@@ -1,0 +1,55 @@
+services:
+  agent-builder:
+    build:
+      context: .
+      dockerfile: services/agent-builder/Dockerfile
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    environment:
+      - DYNAMODB_ENDPOINT_URL=http://dynamodb-local:8000
+      - DATABASE_URL=postgresql+asyncpg://panasa:panasa@postgres:5432/panasa_agent_builder
+      - REDIS_URL=redis://redis:6379/0
+      - LANGFUSE_HOST=http://langfuse:3000
+    volumes:
+      - ./services/agent-builder/app:/app/app
+      - ./shared:/app/shared
+    depends_on:
+      - postgres
+      - dynamodb-local
+      - redis
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=panasa
+      - POSTGRES_PASSWORD=panasa
+      - POSTGRES_DB=panasa_agent_builder
+    ports:
+      - "5432:5432"
+    volumes:
+      - docker-volumes/postgres:/var/lib/postgresql/data
+
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    ports:
+      - "8000:8000"
+    command: ["-jar", "DynamoDBLocal.jar", "-sharedDb", "-inMemory"]
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  langfuse:
+    image: langfuse/langfuse:2
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://panasa:panasa@postgres:5432/panasa_agent_builder
+      - NEXTAUTH_SECRET=changeme
+      - SALT=changeme
+      - NEXTAUTH_URL=http://localhost:3000
+    depends_on:
+      - postgres
