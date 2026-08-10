@@ -3,24 +3,13 @@ import base64
 import json
 import uuid
 from datetime import UTC, datetime
-from decimal import Decimal
 from typing import Any
 
 from boto3.dynamodb.conditions import Key
 from shared.models.agent import AgentConfig
 
-from app.core.dynamodb import get_agents_table
+from app.core.dynamodb import get_agents_table, to_dynamo_item
 from app.schemas.agent import AgentCreate, AgentUpdate
-
-
-def _floats_to_decimal(value: Any) -> Any:
-    if isinstance(value, float):
-        return Decimal(str(value))
-    if isinstance(value, dict):
-        return {k: _floats_to_decimal(v) for k, v in value.items()}
-    if isinstance(value, list):
-        return [_floats_to_decimal(v) for v in value]
-    return value
 
 
 def _encode_cursor(key: dict) -> str:
@@ -49,7 +38,7 @@ async def create_agent(*, tenant_id: str, created_by: str, payload: AgentCreate)
         updated_at=now,
         status="draft",
     )
-    item = _floats_to_decimal(agent.model_dump(mode="json", by_alias=True))
+    item = to_dynamo_item(agent.model_dump(mode="json", by_alias=True))
     table = get_agents_table()
     await asyncio.to_thread(table.put_item, Item=item)
     return agent
@@ -90,7 +79,7 @@ async def update_agent(tenant_id: str, agent_id: str, payload: AgentUpdate) -> A
     updated = existing.model_copy(update=payload.model_dump(exclude_unset=True))
     updated.updated_at = datetime.now(UTC)
 
-    item = _floats_to_decimal(updated.model_dump(mode="json", by_alias=True))
+    item = to_dynamo_item(updated.model_dump(mode="json", by_alias=True))
     table = get_agents_table()
     await asyncio.to_thread(table.put_item, Item=item)
     return updated
@@ -121,7 +110,7 @@ async def duplicate_agent(tenant_id: str, agent_id: str, created_by: str) -> Age
             "status": "draft",
         }
     )
-    item = _floats_to_decimal(duplicate.model_dump(mode="json", by_alias=True))
+    item = to_dynamo_item(duplicate.model_dump(mode="json", by_alias=True))
     table = get_agents_table()
     await asyncio.to_thread(table.put_item, Item=item)
     return duplicate

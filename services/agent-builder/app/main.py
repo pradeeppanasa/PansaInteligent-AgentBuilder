@@ -6,11 +6,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.router import api_router
 from app.core.config import settings
-from app.core.dynamodb import ensure_agents_table
+from app.core.dynamodb import ensure_agents_table, ensure_templates_table
 from app.core.errors import register_exception_handlers
 from app.core.logging import configure_logging
 from app.core.middleware import RequestContextMiddleware
 from app.core.seed import seed_bootstrap_admin
+from app.core.seed_templates import seed_default_templates
 
 configure_logging()
 
@@ -18,7 +19,9 @@ configure_logging()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await asyncio.to_thread(ensure_agents_table)
+    await asyncio.to_thread(ensure_templates_table)
     await seed_bootstrap_admin()
+    await seed_default_templates()
     yield
 
 

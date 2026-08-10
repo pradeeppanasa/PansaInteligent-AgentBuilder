@@ -6,6 +6,7 @@ from app.core.security import get_current_active_user, require_role
 from app.models.user import User
 from app.schemas.agent import AgentCreate, AgentListResponse, AgentUpdate
 from app.services import agents as agents_service
+from app.services import templates as templates_service
 
 router = APIRouter()
 
@@ -65,6 +66,31 @@ async def delete_agent(
     deleted = await agents_service.delete_agent(user.tenant_id, agent_id)
     if not deleted:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Agent not found")
+
+
+@router.post(
+    "/from-template/{template_id}", response_model=AgentConfig, status_code=status.HTTP_201_CREATED
+)
+async def create_agent_from_template(
+    template_id: str,
+    user: User = Depends(can_write),
+) -> AgentConfig:
+    template = await templates_service.get_template(template_id)
+    if template is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Template not found")
+
+    payload = AgentCreate(
+        name=template.name,
+        description=template.description,
+        template_id=template.template_id,
+        system_prompt=template.default_system_prompt,
+        tools=template.suggested_tools,
+        llm_config=template.suggested_model,
+        guardrail_config=template.guardrail_preset,
+    )
+    return await agents_service.create_agent(
+        tenant_id=user.tenant_id, created_by=str(user.id), payload=payload
+    )
 
 
 @router.post(

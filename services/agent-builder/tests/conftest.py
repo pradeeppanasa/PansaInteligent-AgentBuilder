@@ -3,7 +3,8 @@ from collections.abc import AsyncGenerator
 import app.core.dynamodb as dynamodb_module
 import pytest
 from app.core.database import Base, get_async_session
-from app.core.dynamodb import ensure_agents_table
+from app.core.dynamodb import ensure_agents_table, ensure_templates_table
+from app.core.seed_templates import seed_default_templates_sync
 from app.core.users import UserManager
 from app.main import app
 from app.models.user import User
@@ -67,5 +68,7 @@ def dynamodb_table(monkeypatch):
     with mock_aws():
         dynamodb_module._resource = None
         ensure_agents_table()
+        ensure_templates_table()
+        seed_default_templates_sync()
         yield
         dynamodb_module._resource = None
