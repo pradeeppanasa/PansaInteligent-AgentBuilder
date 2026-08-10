@@ -18,11 +18,15 @@ class Settings(BaseSettings):
     DYNAMODB_TABLE_SESSIONS: str = "panasa-sessions"
     DYNAMODB_TABLE_AUDIT: str = "panasa-audit"
 
-    DATABASE_URL: str = "postgresql+asyncpg://panasa:panasa@localhost:5432/panasa_agent_builder"
+    DATABASE_URL: str = "postgresql+asyncpg://panasa:panasa@localhost:5433/panasa_agent_builder"
 
     JWT_SECRET: str = "changeme"
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRE_MINUTES: int = 60
+    JWT_REFRESH_EXPIRE_MINUTES: int = 60 * 24 * 7
+
+    BOOTSTRAP_ADMIN_EMAIL: str | None = None
+    BOOTSTRAP_ADMIN_PASSWORD: str | None = None
 
     CORS_ORIGINS: str = "http://localhost:5173"
 

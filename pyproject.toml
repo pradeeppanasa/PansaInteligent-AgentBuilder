@@ -6,9 +6,11 @@ target-version = ["py311"]
 line-length = 100
 target-version = "py311"
 src = ["services", "shared"]
+extend-exclude = ["**/alembic/versions/*"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+ignore = ["B008"]  # FastAPI's Depends() in argument defaults is idiomatic
 
 [tool.mypy]
 python_version = "3.11"

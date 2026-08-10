@@ -27,9 +27,9 @@ services:
       - POSTGRES_PASSWORD=panasa
       - POSTGRES_DB=panasa_agent_builder
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
-      - docker-volumes/postgres:/var/lib/postgresql/data
+      - ./docker-volumes/postgres:/var/lib/postgresql/data
 
   dynamodb-local:
     image: amazon/dynamodb-local:latest
